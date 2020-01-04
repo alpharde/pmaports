@@ -1,0 +1,82 @@
+pkgname=linux-samsung-i9000
+pkgver=4.19
+pkgrel=1
+pkgdesc="Linux Kernel for Samsung i9000"
+arch="armhf"
+_carch="arm"
+_flavor="samsung-i9000"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev openssl-dev file bison flex"
+
+# Compiler: latest GCC from Alpine
+HOSTCC="${CC:-gcc}"
+HOSTCC="${HOSTCC#${CROSS_COMPILE}}"
+
+# Source
+_repository="linux"
+_commit="b41ea5ef290db055fa579931441ded4dc5e60dac"
+_config="config-${_flavor}.${arch}"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/PabloPL/${_repository}/archive/${_commit}.tar.gz
+	$_config
+"
+
+builddir="$srcdir/$_repository-${_commit}"
+
+#prepare_isorec() {
+	# Use Alpine's busybox.static instead of the pre-compiled busybox shipped
+	# with the source
+	#cp -v /usr/$(arch_to_hostspec $arch)/bin/busybox.static \
+	#	"$builddir"/usr/galaxys_initramfs_files/busybox
+
+	# do not use ramdisk.cpio and ramdisk-recovery-device.cpio, always use
+	# the initramfs from the recovery partition ("isorec"), so we can build
+	# it later and independently from the kernel. also directly boot that
+	# partition, not only when the recovery key combination was used.
+	#cd "$builddir"/usr/
+	#mv galaxys_initramfs.list galaxys_initramfs.list_old
+	#grep -v "../../ramdisk" galaxys_initramfs.list_old > galaxys_initramfs.list
+	#cp -v "$srcdir"/init "$builddir"/usr/galaxys_initramfs_files/init
+
+	# Paths supplied to gen_initramfs_list.sh are prefixed with "source/".
+	#ln -s "$builddir" ln -s "$builddir"/source
+#}
+
+prepare() {
+	default_prepare
+	#prepare_isorec
+
+	cd "$builddir"
+	downstreamkernel_prepare "$srcdir" "$builddir" "$_config" "$_carch" "$HOSTCC"
+}
+
+build() {
+	unset LDFLAGS
+
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	# kernel.release
+	install -D "$builddir/include/config/kernel.release" \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
+	# zImage (find the right one)
+	cd "$builddir/arch/$_carch/boot"
+	_target="$pkgdir/boot/vmlinuz-$_flavor"
+	for _zimg in zImage-dtb Image.gz-dtb *zImage Image; do
+		[ -e "$_zimg" ] || continue
+		msg "zImage found: $_zimg"
+		install -Dm644 "$_zimg" "$_target"
+		break
+	done
+	if ! [ -e "$_target" ]; then
+		error "Could not find zImage in $PWD!"
+		return 1
+	fi
+}
+
+sha512sums=""

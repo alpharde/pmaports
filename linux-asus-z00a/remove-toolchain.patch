@@ -1,0 +1,12 @@
+--- b/Makefile	2020-01-02 00:24:44.342205989 +0000
++++ a/Makefile	2020-01-02 00:25:00.214206040 +0000
+@@ -165,9 +165,6 @@
+ #ARCH
+ CARCH := x86_64
+ 
+-#Toolchain
+-GCC :=../x86_64-linaro-gcc-5.3.1/bin/x86_64-linux-
+-
+ 
+ # SUBARCH tells the usermode build what the underlying arch is.  That is set
+ # first, and if a usermode build is happening, the "ARCH=um" on the command

@@ -1,0 +1,11 @@
+--- a/Makefile	2020-01-02 14:10:55.353248579 -0300
++++ b/Makefile	2020-01-02 14:12:10.333249756 -0300
+@@ -371,7 +371,7 @@
+ MOD_FLAGS 	= -DMODULE $(KERNEL_FLAGS)
+ CFLAGS_MODULE 	= $(MODFLAGS) -Ofast
+ AFLAGS_MODULE 	= $(MODFLAGS) -Ofast
+-LDFLAGS_MODULE 	= -T $(srctree)/scripts/module-common.lds
++LDFLAGS_MODULE 	= 
+ CFLAGS_KERNEL  	= $(MODFLAGS) -Ofast
+ AFLAGS_KERNEL 	= $(MODFLAGS) -Ofast
+ CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage

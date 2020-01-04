@@ -1,0 +1,23 @@
+pkgname=device-samsung-i9000
+pkgver=0
+pkgrel=1
+pkgdesc="Samsung Galaxy S"
+url="https://postmarketos.org"
+arch="armhf"
+license="MIT"
+depends="postmarketos-base linux-samsung-i9000 libsamsung-ipc mesa-dri-swrast"
+makedepends=""
+install="$pkgname.post-install"
+#subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	90-android-touch-dev.rules
+"
+options="!check !archcheck"
+
+package() {
+	install -D -m644 "$srcdir/deviceinfo" \
+		"$pkgdir/etc/deviceinfo"
+}
+
+sha512sums=""
